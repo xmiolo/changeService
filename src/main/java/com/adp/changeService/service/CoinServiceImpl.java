@@ -40,7 +40,7 @@ public class CoinServiceImpl implements CoinService {
 
     @Transactional
     public void updateCoinQuantity(UpdateCoinQuantityRequest updateCoinQuantityRequest) {
-        if(Math.round(updateCoinQuantityRequest.getQuantity()) == updateCoinQuantityRequest.getQuantity()){
+        if(updateCoinQuantityRequest.getQuantity() > 0 && Math.round(updateCoinQuantityRequest.getQuantity()) == updateCoinQuantityRequest.getQuantity()){
             Coin coin = getCoinByType(updateCoinQuantityRequest.getCoinType());
             updateCoinQuantity(coin, (int)updateCoinQuantityRequest.getQuantity());
         } else
