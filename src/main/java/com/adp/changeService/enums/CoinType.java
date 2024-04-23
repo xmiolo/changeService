@@ -6,7 +6,10 @@ import java.math.BigDecimal;
 
 @Getter
 public enum CoinType {
-    PENNY(new BigDecimal("0.01")), NICKEL(new BigDecimal("0.05")), DIME(new BigDecimal("0.10")), QUARTER(new BigDecimal("0.25"));
+    PENNY(new BigDecimal("0.01")),
+    NICKEL(new BigDecimal("0.05")),
+    DIME(new BigDecimal("0.10")),
+    QUARTER(new BigDecimal("0.25"));
 
     private final BigDecimal value;
 

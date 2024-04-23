@@ -12,7 +12,6 @@ public class ChangeResponse {
 
     private BigDecimal changeAmount;
     private Map<CoinType, Integer> coinsReturned;
-    private String message;
 
     public ChangeResponse(BigDecimal changeAmount) {
         this.changeAmount = changeAmount;

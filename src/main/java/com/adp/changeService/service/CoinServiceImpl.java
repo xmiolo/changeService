@@ -1,9 +1,12 @@
 package com.adp.changeService.service;
 
+import com.adp.changeService.dto.UpdateCoinQuantityRequest;
 import com.adp.changeService.entity.Coin;
 import com.adp.changeService.enums.CoinType;
-import com.adp.changeService.exception.InsufficientChangeException;
+import com.adp.changeService.exception.ChangeException;
+import com.adp.changeService.exception.CoinException;
 import com.adp.changeService.repository.CoinRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,22 +20,30 @@ public class CoinServiceImpl implements CoinService {
     private CoinRepository coinRepository;
 
     @Override
-    public Coin getCoinByType(CoinType type) {
-        return coinRepository.findByType(type)
-                .orElseThrow(() -> new InsufficientChangeException("Coin not found: " + type));
+    public Coin getCoinByType(CoinType coinType) {
+        return coinRepository.findByType(coinType)
+                .orElseThrow(() -> new ChangeException("Coin not found: " + coinType));
     }
 
-    @Override
     public void updateCoinQuantity(Coin coin, int newQuantity) {
         coin.setQuantity(newQuantity);
         coinRepository.save(coin);
     }
 
     @Override
-    public BigDecimal getTotalValueAvailable() {
+    public BigDecimal getTotalValueAvailableForChange() {
         List<Coin> allCoins = coinRepository.findAll();
         return allCoins.stream()
                 .map(coin -> coin.getType().getValue().multiply(BigDecimal.valueOf(coin.getQuantity())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    @Transactional
+    public void updateCoinQuantity(UpdateCoinQuantityRequest updateCoinQuantityRequest) {
+        if(Math.round(updateCoinQuantityRequest.getQuantity()) == updateCoinQuantityRequest.getQuantity()){
+            Coin coin = getCoinByType(updateCoinQuantityRequest.getCoinType());
+            updateCoinQuantity(coin, (int)updateCoinQuantityRequest.getQuantity());
+        } else
+            throw new CoinException("Only integers are allowed");
     }
 }

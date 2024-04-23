@@ -1,9 +1,12 @@
 package com.adp.changeService.service;
 
+import com.adp.changeService.dto.ChangeRequest;
 import com.adp.changeService.dto.ChangeResponse;
 import com.adp.changeService.entity.Coin;
+import com.adp.changeService.enums.BillType;
 import com.adp.changeService.enums.CoinType;
-import com.adp.changeService.exception.InsufficientChangeException;
+import com.adp.changeService.exception.BillException;
+import com.adp.changeService.exception.ChangeException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -19,26 +22,32 @@ public class ChangeServiceImpl implements ChangeService {
     private CoinService coinService;
 
     @Override
-    public ResponseEntity<ChangeResponse> calculateChange(BigDecimal billAmount, boolean lessCoin) {
+    public ResponseEntity<ChangeResponse> calculateChange(ChangeRequest changeRequest) {
+        BigDecimal billAmount = changeRequest.getBillAmount();
+        boolean lessCoin = changeRequest.isLessCoin();
+        ChangeResponse changeResponse = new ChangeResponse(billAmount);
 
-        if (billAmount.compareTo(coinService.getTotalValueAvailable()) > 0) {
-            throw new InsufficientChangeException("Not enough coins to make change");
+        if(!isValidBillValue(billAmount)) {
+            throw new BillException("Bill value not allowed");
         }
 
-        ChangeResponse changeResponse = new ChangeResponse(billAmount);
+        if (billAmount.compareTo(coinService.getTotalValueAvailableForChange()) > 0) {
+            throw new ChangeException("Not enough coins to make change");
+        }
+
         BigDecimal remainingAmount = billAmount;
 
         List<CoinType> coinList = provideOptimalChange(lessCoin);
 
         for(CoinType coinType : coinList) {
             Coin coin = coinService.getCoinByType(coinType);
-            int avaliableCount = coin.getQuantity();
+            int availableCount = coin.getQuantity();
             int divisionCount = remainingAmount.divide(coinType.getValue(), RoundingMode.FLOOR).intValue();
-            divisionCount = Math.min(divisionCount, avaliableCount);
+            divisionCount = Math.min(divisionCount, availableCount);
 
             if (divisionCount > 0) {
                 changeResponse.getCoinsReturned().put(coinType, divisionCount);
-                coinService.updateCoinQuantity(coin, avaliableCount - divisionCount);
+                coinService.updateCoinQuantity(coin, availableCount - divisionCount);
                 remainingAmount = remainingAmount.subtract(coinType.getValue().multiply(new BigDecimal(divisionCount)));
             }
         }
@@ -52,5 +61,10 @@ public class ChangeServiceImpl implements ChangeService {
             Collections.reverse(coinList);
         }
         return coinList;
+    }
+
+    private boolean isValidBillValue(BigDecimal billAmount) {
+        return Arrays.stream(BillType.values())
+                .anyMatch(billValue -> billValue.getValue().equals(billAmount));
     }
 }

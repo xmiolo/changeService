@@ -17,13 +17,8 @@ public class ChangeController {
     @Autowired
     private ChangeService changeService;
 
-   /* public void ChangeController(ChangeService changeService){
-        Assert.notNull(changeService, "ChangeService must not be null!");
-        this.changeService = changeService;
-    }*/
-
     @PostMapping
     public ResponseEntity<ChangeResponse> postChange(@RequestBody ChangeRequest request) {
-        return changeService.calculateChange(request.getBillAmount(), request.isLessCoin());
+        return changeService.calculateChange(request);
     }
 }

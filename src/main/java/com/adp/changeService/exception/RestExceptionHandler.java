@@ -10,9 +10,18 @@ import java.util.Arrays;
 @ControllerAdvice
 public class RestExceptionHandler {
 
-    @ExceptionHandler(InsufficientChangeException.class)
-    public ResponseEntity<ErrorResponse> handleInsufficientChange(InsufficientChangeException ex) {
-        ErrorResponse errorResponse = new ErrorResponse("Insufficient Change", Arrays.asList(ex.getMessage()));
-        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    @ExceptionHandler(ChangeException.class)
+    public ResponseEntity<ErrorResponse> handleInsufficientChange(ChangeException ex) {
+        return new ResponseEntity<>(new ErrorResponse("Insufficient Change", Arrays.asList(ex.getMessage())), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(BillException.class)
+    public ResponseEntity<ErrorResponse> handleBillValueException(BillException ex) {
+        return new ResponseEntity<>(new ErrorResponse("Invalid bill value", Arrays.asList(ex.getMessage())), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(CoinException.class)
+    public ResponseEntity<ErrorResponse> handleCoinException(CoinException ex) {
+        return new ResponseEntity<>(new ErrorResponse("Invalid coin amount", Arrays.asList(ex.getMessage())), HttpStatus.BAD_REQUEST);
     }
 }
