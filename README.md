@@ -29,7 +29,8 @@ A RESTful API for calculating optimal change amounts given a bill value.
 **Request Format**
 
 ```json
-{ "billAmount": 5,
+{ 
+  "billAmount": 5,
   "lessCoin": true
 }
 ````
@@ -47,7 +48,7 @@ A RESTful API for calculating optimal change amounts given a bill value.
 **Example Usage**
 
 *Using cURL*
-```json
+```
 curl -X POST http://localhost:8080/api/change \
 -H "Content-Type: application/json" \
 -d '{"billAmount": 5}'
@@ -68,14 +69,14 @@ curl -X POST http://localhost:8080/api/change \
 ````
 
 **Response Format**
-```json
+```
 Coin quantity updated successfully
 ````
 
 **Example Usage**
 
 *Using cURL*
-```json
+```
 curl -X PUT http://localhost:8080/api/coins/quantity \
 -H "Content-Type: application/json" \
 -d '{"coinType": "QUARTER", "quantity": 200}'
