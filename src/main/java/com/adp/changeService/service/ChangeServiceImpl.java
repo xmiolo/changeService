@@ -13,7 +13,10 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 @Service
 public class ChangeServiceImpl implements ChangeService {
@@ -40,15 +43,17 @@ public class ChangeServiceImpl implements ChangeService {
         List<CoinType> coinList = provideOptimalChange(lessCoin);
 
         for(CoinType coinType : coinList) {
-            Coin coin = coinService.getCoinByType(coinType);
-            int availableCount = coin.getQuantity();
-            int divisionCount = remainingAmount.divide(coinType.getValue(), RoundingMode.FLOOR).intValue();
-            divisionCount = Math.min(divisionCount, availableCount);
+            if(!remainingAmount.equals(BigDecimal.ZERO)) {
+                Coin coin = coinService.getCoinByType(coinType);
+                int availableCount = coin.getQuantity();
+                int divisionCount = remainingAmount.divide(coinType.getValue(), RoundingMode.FLOOR).intValue();
+                divisionCount = Math.min(divisionCount, availableCount);
 
-            if (divisionCount > 0) {
-                changeResponse.getCoinsReturned().put(coinType, divisionCount);
-                coinService.updateCoinQuantity(coin, availableCount - divisionCount);
-                remainingAmount = remainingAmount.subtract(coinType.getValue().multiply(new BigDecimal(divisionCount)));
+                if (divisionCount > 0) {
+                    changeResponse.getCoinsReturned().put(coinType, divisionCount);
+                    coinService.updateCoinQuantity(coin, availableCount - divisionCount);
+                    remainingAmount = remainingAmount.subtract(coinType.getValue().multiply(new BigDecimal(divisionCount)));
+                }
             }
         }
 
